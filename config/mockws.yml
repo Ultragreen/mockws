@@ -1,0 +1,43 @@
+:mockws:
+  :default:
+    :type_map:
+      :json: "application/json"
+      :csv: "application/csv"
+    :serializer:
+      :json: :to_json
+      :yaml: :to_yml
+      :csv: :to_csv
+  :development:
+    :services:
+      :mon_service:
+        :verb: :get
+        :route: "/mymockservice/data"
+        :type: :static
+        # :path: "/tmp/data.csv"
+        :status: 200
+      :mon_service_2:
+        :verb: :get
+        :route: "/myotherservice/output"
+        :type: :inline
+        :data:
+          :toto_1: "titi"
+          :toto_2: "tutu"
+        :to: :json
+      :TEST1:
+        :verb: :get
+        :route: "/TEST1/data.csv"
+        :type: :static
+        :path: "/tmp/test1_data.csv"
+        :status: 200
+      :TEST2:
+        :verb: :get
+        :route: "/test2/data"
+        :type: :inline
+        :data:
+          - :value1: "2384"
+            :value2: "ok"
+          - :value1: "863"
+            :value2: "nok"
+          - :value1: "38927"
+            :value2: "partial"
+        :to: :json
