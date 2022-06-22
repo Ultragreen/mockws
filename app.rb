@@ -17,6 +17,7 @@ module MockWS
           ext = File.extname(value[:path])[1..-1].to_sym
           data = File.readlines(value[:path]).join('\n')
           content_type = settings.config.type_map[ext]
+          sleep(settings.config.static_response_time_seconds) if settings.config.static_response_time_seconds
           status value[:status]
           return data
         end
@@ -24,6 +25,7 @@ module MockWS
         send(value[:verb], value[:route]) do
           content_type = settings.config.type_map[value[:to]]
           status value[:status]
+          sleep(settings.config.static_response_time_seconds) if settings.config.static_response_time_seconds
           return value[:data].send(settings.config.serializer[value[:to]])
         end
       when :proc
@@ -37,6 +39,7 @@ module MockWS
               myproc = eval("lambda { #{rule} } ")
               record[field] = myproc.call({:data => data})
             end
+            sleep(settings.config.static_response_time_seconds) if settings.config.static_response_time_seconds
             return record.send(settings.config.serializer[value[:to]])
           end
         end

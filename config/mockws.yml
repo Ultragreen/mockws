@@ -7,6 +7,7 @@
       :json: :to_json
       :yaml: :to_yml
       :csv: :to_csv
+    :static_response_time_seconds: 20
   :development:
     :services:
       :mon_service:
