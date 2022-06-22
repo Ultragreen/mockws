@@ -26,9 +26,34 @@ module MockWS
           status value[:status]
           return value[:data].send(settings.config.serializer[value[:to]])
         end
+      when :proc
+        send(value[:verb], value[:route]) do
+          record = Hash::new
+          content_type = settings.config.type_map[value[:to]]
+          status value[:status]
+          if value[:definition][:inline] then
+            data = value[:definition][:inline][:data]
+            value[:definition][:rules].each do |field, rule|
+              myproc = eval("lambda { #{rule} } ")
+              record[field] = myproc.call({:data => data})
+            end
+            return record.send(settings.config.serializer[value[:to]])
+          end
+        end
       else
         p 'type not defined or type not recognize'
       end
     end
+
+    private 
+    def get_rules 
+      rules = Array::new
+      get_config.filters[@worker.to_sym].each do |item|
+
+          rules.push eval("lambda { #{item[:definition]} } ")
+      end
+      return rules
+  end
+
   end
 end

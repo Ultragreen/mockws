@@ -13,7 +13,7 @@
         :verb: :get
         :route: "/mymockservice/data"
         :type: :static
-        # :path: "/tmp/data.csv"
+        :path: "/tmp/data.csv"
         :status: 200
       :mon_service_2:
         :verb: :get
@@ -23,6 +23,20 @@
           :toto_1: "titi"
           :toto_2: "tutu"
         :to: :json
+      :mon_service_3:
+        :verb: :get
+        :route: "/mymockservice/proc"
+        :type: :proc
+        :definition:
+          :inline:
+            :data:
+              :val1: [1, 2]
+              :val2: 45
+          :rules:
+            :val1: "|options| options[:data][:val1] = 2"
+            :val2: "|options| puts options[:data];options[:data][:val2] = options[:data][:val1]+10"
+        :to: :json
+        :status: 200
       :TEST1:
         :verb: :get
         :route: "/TEST1/data.csv"
