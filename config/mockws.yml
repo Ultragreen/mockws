@@ -8,6 +8,7 @@
       :yaml: :to_yml
       :csv: :to_csv
     :static_response_time_seconds: 20
+    :services:
   :development:
     :services:
       :mon_service:
@@ -56,3 +57,4 @@
           - :value1: "38927"
             :value2: "partial"
         :to: :json
+    

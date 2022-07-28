@@ -1,0 +1,1 @@
+require "carioca/rake/manage"
