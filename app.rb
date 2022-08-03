@@ -34,7 +34,8 @@ module MockWS
           ext = File.extname(value[:path])[1..-1].to_sym
           data = File.readlines(value[:path]).join('\n')
           content_type = get_config.type_map[ext]
-          sleep(get_config.static_response_time_seconds) if get_config.static_response_time_seconds
+          response_time = get_response_time(value)
+          sleep(response_time)
           status value[:status]
           return data
         end
@@ -42,7 +43,8 @@ module MockWS
         send(value[:verb], value[:route]) do
           content_type = get_config.type_map[value[:to]]
           status value[:status]
-          sleep(get_config.static_response_time_seconds) if get_config.static_response_time_seconds
+          response_time = get_response_time(value)
+          sleep(response_time)
           return value[:data].send(get_config.serializer[value[:to]])
         end
       when :proc
@@ -56,7 +58,8 @@ module MockWS
               myproc = eval("lambda { #{rule} } ")
               record[field] = myproc.call({:data => data})
             end
-            sleep(get_config.static_response_time_seconds) if get_config.static_response_time_seconds
+            response_time = get_response_time(value)
+            sleep(response_time)
             return record.send(get_config.serializer[value[:to]])
           end
         end
@@ -73,7 +76,15 @@ module MockWS
           rules.push eval("lambda { #{item[:definition]} } ")
       end
       return rules
-  end
-
+    end
+    def get_response_time(value)
+      if value[:response_time_method] == :random
+        r = Random::new
+        return r.rand(20)
+      else value[:response_time_method] == :static
+        if value[:res]
+        return get_config.static_response_time_seconds
+      end
+    end
   end
 end

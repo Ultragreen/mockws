@@ -17,6 +17,7 @@
         :type: :static
         :path: "/tmp/data.csv"
         :status: 200
+        :response_time_method: :random
       :mon_service_2:
         :verb: :get
         :route: "/myotherservice/output"
@@ -25,6 +26,7 @@
           :toto_1: "titi"
           :toto_2: "tutu"
         :to: :json
+        :response_time_method: :random
       :mon_service_3:
         :verb: :get
         :route: "/mymockservice/proc"
@@ -39,12 +41,14 @@
             :val2: "|options| puts options[:data];options[:data][:val2] = options[:data][:val1]+10"
         :to: :json
         :status: 200
+        :response_time_method: :static
       :TEST1:
         :verb: :get
         :route: "/TEST1/data.csv"
         :type: :static
         :path: "/tmp/test1_data.csv"
         :status: 200
+        :response_time_method: :static
       :TEST2:
         :verb: :get
         :route: "/test2/data"
@@ -57,4 +61,5 @@
           - :value1: "38927"
             :value2: "partial"
         :to: :json
+        :response_time_method: :static
     
