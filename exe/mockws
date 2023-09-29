@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'mockws'
+
+require 'mockws/cli'
+
+include MockWS::CLI
+
+MainCommand.start(ARGV)
