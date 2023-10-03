@@ -1,22 +1,18 @@
 :mockws:
   :default:
-    :type_map:
-      :json: "application/json"
-      :csv: "application/csv"
-    :serializer:
-      :json: :to_json
-      :yaml: :to_yml
-      :csv: :to_csv
+    :output:
+      :type: :json
     :services:
-  :development:
+  :main:
     :services:
       :mon_service:
         :verb: :get
         :route: "/mymockservice/data"
         :type: :static
         :path: "/tmp/data.csv"
-        :status: 200
-        :random_time: 10
+        :status: 206
+        :random_time: 5
+        :to: :yaml
       :mon_service_2:
         :verb: :get
         :route: "/myotherservice/output"

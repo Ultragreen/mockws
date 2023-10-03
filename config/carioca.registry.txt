@@ -1,6 +1,0 @@
----
-:redis:
-    :type: :bdd
-    :description: base de données redis
-    :service: dropbox-redis
-    :resource: redis

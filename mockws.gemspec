@@ -34,6 +34,8 @@ Gem::Specification.new do |spec|
     spec.add_development_dependency 'yard', '~> 0.9.27'
     spec.add_development_dependency 'yard-rspec', '~> 0.1'
     spec.metadata['rubygems_mfa_required'] = 'false'
-    spec.add_dependency 'carioca', '~> 2.0.9'
+    spec.add_dependency 'carioca', '~> 2.1'
     spec.add_dependency 'thor', '~> 1.2'
+    spec.add_dependency 'thin', '~> 1.8'
+    spec.add_dependency 'sinatra', '~> 3.1'
   end

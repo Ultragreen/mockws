@@ -1,25 +1,80 @@
 require 'sinatra'
 require 'yaml'
+require 'json'
 require 'carioca'
 require 'thor'
+require 'csv'
+require 'etc'
+
+require_relative 'mockws/setup'
 
 
-require_relative 'mockws/route_manager'
+    # facility to find a file in gem path
+    # @param [String] gem a Gem name
+    # @param [String] file a file relative path in the gem
+    # @return [String] the path of the file, if found.
+    # @return [False] if not found
+    def search_file_in_gem(gem, file)
+      if Gem::Specification.respond_to?(:find_by_name)
+        begin
+          spec = Gem::Specification.find_by_name(gem)
+        rescue LoadError
+          spec = nil
+        end
+      else
+        spec = Gem.searcher.find(gem)
+      end
+      if spec
+        res = if Gem::Specification.respond_to?(:find_by_name)
+                spec.lib_dirs_glob.split('/')
+              else
+                Gem.searcher.lib_dirs_for(spec).split('/')
+              end
+        res.pop
+        services_path = res.join('/').concat("/#{file}")
+        return services_path if File.exist?(services_path)
 
-environment = ENV['RACK_ENV'] ? ENV['RACK_ENV'].to_sym : :development
+      end
+      false
+    end
+
+module MockWS
+
+  DEFAULT_PATH = '~/.mockws'
+  DEFAULT_CONFIG_PATH = "#{DEFAULT_PATH}/config"
+  DEFAULT_LOGS_PATH = "#{DEFAULT_PATH}/logs" 
+
+  DEFAULT_LOG_FILENAME = "mockws.log"
+  DEFAULT_SETTINGS_FILENAME = "mockws.yml"
+
+end
+
+
+unless File.exist? File.expand_path(MockWS::DEFAULT_CONFIG_PATH)
+  puts "[W] MockWS not initialized for user #{Etc.getpwuid(Process.uid).name}, running setup"
+  MockWS::Configuration.setup
+end
+
+context = ENV['RACK_ENV'] ? ENV['RACK_ENV'].to_sym : :main
 
 Carioca::Registry.configure do |spec|
   spec.debug = true
   spec.init_from_file = false
-  spec.log_file = '/tmp/mockws.log'
-  spec.config_file = './config/mockws.yml'
+  spec.log_file = File.expand_path("#{MockWS::DEFAULT_LOGS_PATH}/mockws.log")
+  spec.config_file = File.expand_path("#{MockWS::DEFAULT_CONFIG_PATH}/#{MockWS::DEFAULT_SETTINGS_FILENAME}")
   spec.config_root = :mockws
-  spec.environment = environment
-  spec.default_locale = :fr
-  spec.log_level = :debug
-  spec.locales_load_path << Dir[File.expand_path('./config/locales') + "/*.yml"]
+  spec.environment = context
+  spec.default_locale = :en
+  spec.log_level = :info
+  spec.locales_load_path << Dir[search_file_in_gem('mockws', './config/locales') + "/*.yml"]
   spec.debugger_tracer = :logger
 end
+
+
+require_relative 'mockws/route_manager'
+require_relative 'mockws/data_manager'
+require_relative 'mockws/daemon_controller'
+
 
 class ApplicationController < Carioca::Container
   inject service: :configuration
@@ -36,7 +91,7 @@ module MockWS
   
 
     def self.init
-      MockWS::RouteManager::new(self)
+      MockWS::RouteManager::configure(self)
     end
 
 
@@ -127,3 +182,5 @@ end
       end
       return 0
     end
+
+     
