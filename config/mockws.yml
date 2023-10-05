@@ -40,4 +40,21 @@
             :value2: "partial"
         :to: :json
         :response_time: 2
-    
+      :crud_test:
+        :type: :crud
+        :object: post
+        :to: :json 
+        :model: 
+          :name: 
+            :type: :string
+            :unicity: true
+            :mandatory: true
+          :title: 
+            :type: :string
+            :unicity: false
+            :mandatory: true
+          :description: 
+            :type: :string
+            :unicity: false
+            :mandatory: false
+        :primary_key: :name

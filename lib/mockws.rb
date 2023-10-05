@@ -72,6 +72,7 @@ end
 
 
 require_relative 'mockws/route_manager'
+require_relative 'mockws/crud_manager'
 require_relative 'mockws/data_manager'
 require_relative 'mockws/daemon_controller'
 
@@ -87,11 +88,13 @@ module MockWS
     extend Carioca::Injector
     inject service: :output
     inject service: :configuration
+    inject service: :finisher
 
   
 
     def self.init
       MockWS::RouteManager::configure(self)
+      MockWS::CRUDManager::configure(self)
     end
 
 

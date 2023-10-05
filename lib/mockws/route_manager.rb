@@ -17,7 +17,7 @@ module MockWS
         def self.configure(service)
             @service = service
             output.info "Mock routes initialisation : "
-            configuration.settings.services.each do |_key, definition|
+            configuration.settings.services.select {|key,value| [:static,:inline].include? value[:type]}.each do |_key, definition|
                 create_route(definition)    
             end
         end
