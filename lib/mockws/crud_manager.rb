@@ -151,59 +151,66 @@ module MockWS
         
         def self.create_crud_service
             @@service.get  '/crud/:model/list' do |model|
-                result = finisher.secure_api_return(return_case: :status_ok, structured: true, json: false) do
-                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :status_ko unless @@store.models.include? model
+                result = finisher.secure_api_return(return_case: :status_ok, structured: true, json: true) do
+                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :bad_request unless @@store.models.include? model
                     @@store.list(model: model)
                 end
                 status result[:code]
-                JSON.pretty_generate(JSON.parse(result.to_json))
+                result[:data]
             end
             
             @@service.get  '/crud/:model/:item' do |model,item|
-                result = finisher.secure_api_return(return_case: :status_ok, structured: true, json: false) do
-                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :status_ko unless @@store.models.include? model
+                result = finisher.secure_api_return(return_case: :accepted, structured: true, json: true) do
+                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :bad_request unless @@store.models.include? model
                     res = @@store.retrieve(model: model, key: item)
-                    finisher.secure_raise message: "No record found", error_case: :not_found if res.nil?
+                    finisher.secure_raise message: "No record found", error_case: :no_content if res.nil?
                     res
                 end
                 status result[:code]
-                JSON.pretty_generate(JSON.parse(result.to_json))
+                result[:data]
             end
             
             @@service.put  '/crud/:model/:item' do |model,item|
-                finisher.secure_api_return(return_case: :status_ok, structured: true, json: true) do
-                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :status_ko unless @@store.models.include? model
-
-
+                result = finisher.secure_api_return(return_case: :accepted, structured: true, json: true) do
+                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :bad_request unless @@store.models.include? model
+                    data = JSON.parse(request.body.read, symbolize_names: true)
+                    res  = @@store.update model: model, key: item, data: data
+                    code = res.delete(:status)
+                    res = "Record successfully updated"
+                    finisher.secure_raise message: "Update Error : #{res} ", error_case: :status_ko unless code
+                    res 
 
                 end
+                status result[:code]
+                result[:data]
             end
             
             @@service.post '/crud/:model' do |model|
-                result = finisher.secure_api_return(return_case: :status_ok, structured: true, json: false) do
+                result = finisher.secure_api_return(return_case: :created, structured: true, json: true) do
                     data = JSON.parse(request.body.read, symbolize_names: true)
-                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :status_ko unless @@store.models.include? model
+                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :bad_request unless @@store.models.include? model
                     res  = @@store.create model: model, data: data
                     code = res.delete(:status)
-                    finisher.secure_raise message: "Creation Error : #{res} ", error_case: :status_ko unless code
+                    res = "Record successfully created"
+                    finisher.secure_raise message: "Creation Error : #{res} ", error_case: :bad_request unless code
                     res
                 end
                 status result[:code]
-                JSON.pretty_generate(JSON.parse(result.to_json))
+                result[:data]
             end
             
             @@service.delete '/crud/:model/:item' do |model,item|
-                result = finisher.secure_api_return(return_case: :status_ok, structured: true, json: false) do
-                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :status_ko unless @@store.models.include? model
+                result = finisher.secure_api_return(return_case: :accepted, structured: true, json: true) do
+                    finisher.secure_raise message: "Error model #{model} not found !", error_case: :bad_request unless @@store.models.include? model
                     if @@store.destroy(model: model, key: item) then
-                      res = 'record successfully deleted'
+                      res = "Record #{item} successfully deleted"
                     else
-                       finisher.secure_raise message: "Suppression failed : #{item} ", error_case: :status_ko unless @@store.destroy(model: model, key: item)
+                       finisher.secure_raise message: "Suppression failed : #{item} ", error_case: :bad_request unless @@store.destroy(model: model, key: item)
                     end
                     res
                 end
                 status result[:code]
-                JSON.pretty_generate(JSON.parse(result.to_json))
+                result[:data]
             end
             
             
